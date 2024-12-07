@@ -12,6 +12,7 @@ import (
 	"path"
 )
 
+// SocketPath tries to find the path to the socket of the keepassxc http api - Linux version
 func SocketPath() (string, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
@@ -42,6 +43,7 @@ func SocketPath() (string, error) {
 	return filename, nil
 }
 
+// connect implements the os specific socket connection action - Linux version
 func connect(socketPath string) (net.Conn, error) {
 	return net.DialUnix("unix", nil, &net.UnixAddr{Name: socketPath, Net: "unix"})
 }

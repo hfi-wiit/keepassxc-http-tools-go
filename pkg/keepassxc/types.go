@@ -119,11 +119,13 @@ type KeepassxcClientProfile interface {
 	SetAssoc(string, nacl.Key) error
 }
 
-// TODO
+// Message represents the api input from the client.
 type Message map[string]interface{}
 
+// Response represents the api response to the client.
 type Response map[string]interface{}
 
+// entries tries to parse the entries from an api response.
 func (r Response) entries() (Entries, error) {
 	var data []byte
 	if msg, ok := r["message"]; ok {

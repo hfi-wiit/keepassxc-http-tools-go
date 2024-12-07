@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-// SocketPath finds the path to the socket file descriptor of the keepassxc http api.
+// SocketPath tries to find the path to the socket of the keepassxc http api - MacOS version
 func SocketPath() (string, error) {
 	tmpDir, ok := os.LookupEnv(utils.DarwinEnvTmpDir)
 	if !ok {
@@ -25,7 +25,7 @@ func SocketPath() (string, error) {
 	return path, nil
 }
 
-// connect implements the os specific socket connection action.
+// connect implements the os specific socket connection action - MacOS version
 func connect(socketPath string) (net.Conn, error) {
 	return net.DialUnix("unix", nil, &net.UnixAddr{Name: socketPath, Net: "unix"})
 }

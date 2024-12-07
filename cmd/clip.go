@@ -60,16 +60,19 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	// TODO add profile from config file
 	client, err := keepassxc.NewClient(dummyProfile{})
 	cobra.CheckErr(err)
+	defer client.Disconnect()
 	entries, err := client.GetLogins(utils.ScriptIndicatorUrl)
 	cobra.CheckErr(err)
 
+	filter := utils.ScriptIndicatorUrl
 	if len(args) > 0 {
-		entries = entries.FilterByName(args[0])
+		filter = args[0]
+		entries = entries.FilterByName(filter)
 	}
 	var selectedEntry *keepassxc.Entry
 	switch len(entries) {
 	case 0:
-		cobra.CheckErr(fmt.Errorf("No logins match the search criteria: %s", args[0]))
+		cobra.CheckErr(fmt.Errorf("No logins match the search criteria: %s", filter))
 	case 1:
 		selectedEntry = entries[0]
 	default:
@@ -84,7 +87,4 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	clip.Write(clip.FmtText, []byte(selectedEntry.Password.Plaintext()))
 	// it seems we need at least some (~5?) milliseconds to be sure the value is copied into clipboard
 	time.Sleep(100 * time.Millisecond)
-
-	err = client.Disconnect()
-	cobra.CheckErr(err)
 }
