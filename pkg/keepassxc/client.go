@@ -141,12 +141,14 @@ func (c *Client) associate() error {
 // testAssociate is a helper function for NewClient.
 // It tests the association if an assocKey is already present in the profile.
 func (c *Client) testAssociate() error {
-	_, err := c.sendMessage(Message{
+	if _, err := c.sendMessage(Message{
 		"action": "test-associate",
 		"key":    utils.NaclKeyToB64(c.AssocProfile.GetAssocKey()),
 		"id":     c.AssocProfile.GetAssocName(),
-	}, true)
-	return errors.Join(err, utils.ErrKeepassxcTestAssocFailed)
+	}, true); err != nil {
+		return errors.Join(err, utils.ErrKeepassxcTestAssocFailed)
+	}
+	return nil
 }
 
 // Disconnect from the keepassxc http api socket.
