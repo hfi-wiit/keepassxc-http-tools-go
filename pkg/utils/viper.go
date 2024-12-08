@@ -45,5 +45,6 @@ func (p ViperKeepassxcProfile) GetAssocKey() nacl.Key {
 func (p ViperKeepassxcProfile) SetAssoc(name string, key nacl.Key) error {
 	viper.Set(ConfigKeypathAssocName, name)
 	viper.Set(ConfigKeypathAssocKey, NaclKeyToB64(key))
+	fmt.Printf("Save config to %s\n", viper.ConfigFileUsed())
 	return viper.WriteConfig()
 }

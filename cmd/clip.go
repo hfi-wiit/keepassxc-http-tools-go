@@ -32,7 +32,7 @@ var clipCmd = &cobra.Command{
 	Use:   "clip [namefilter...]",
 	Args:  cobra.ArbitraryArgs,
 	Run:   clipCmdRun,
-	Short: "Copy data from an entry to clipboard.",
+	Short: "Copy data from an entry to clipboard",
 	Long: `Copy data from an entry to clipboard.
 
 TODO more details...`,

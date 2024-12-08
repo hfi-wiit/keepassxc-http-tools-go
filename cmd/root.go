@@ -4,6 +4,7 @@ Copyright © 2024 Heiko Finzel heiko.finzel@wiit.cloud
 package cmd
 
 import (
+	"fmt"
 	"keepassxc-http-tools-go/pkg/utils"
 	"os"
 	"path"
@@ -30,7 +31,12 @@ var rootCmd = &cobra.Command{
 	Version: Version,
 	Args:    cobra.NoArgs,
 	Short:   "A command line client to interact with keepassxc's http api.",
-	Long:    "A command line client to interact with keepassxc's http api.",
+	Long: fmt.Sprintf(`A command line client to interact with keepassxc's http api.
+	
+To learn more about the config use "%s config" or "%s config -h".`,
+		utils.ApplicationNameShort,
+		utils.ApplicationNameShort,
+	),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
