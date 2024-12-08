@@ -7,24 +7,24 @@ import (
 	"fmt"
 	"keepassxc-http-tools-go/pkg/keepassxc"
 	"keepassxc-http-tools-go/pkg/utils"
+	"strings"
 	"time"
 
 	fzf "github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	clip "golang.design/x/clipboard"
 )
 
 // clipCmd represents the clip command
 var clipCmd = &cobra.Command{
-	Use:   "clip",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "clip [namefilter]",
+	Args:  cobra.ArbitraryArgs,
+	Run:   clipCmdRun,
+	Short: "Copy data from an entry to clipboard.",
+	Long: `Copy data from an entry to clipboard.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: clipCmdRun,
+TODO more details...`,
 }
 
 func init() {
@@ -41,7 +41,7 @@ func init() {
 }
 
 func clipCmdRun(cmd *cobra.Command, args []string) {
-	client, err := keepassxc.NewClient(ViperKeepassxcProfile{})
+	client, err := keepassxc.NewClient(utils.ViperKeepassxcProfile{})
 	cobra.CheckErr(err)
 	defer client.Disconnect()
 	entries, err := client.GetLogins(utils.ScriptIndicatorUrl)
@@ -49,8 +49,8 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 
 	filter := utils.ScriptIndicatorUrl
 	if len(args) > 0 {
-		filter = args[0]
-		entries = entries.FilterByName(filter)
+		filter = strings.Join(args, " ")
+		entries = entries.FilterByName(args...)
 	}
 	var selectedEntry *keepassxc.Entry
 	switch len(entries) {
@@ -59,15 +59,27 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	case 1:
 		selectedEntry = entries[0]
 	default:
-		idx, err := fzf.Find(entries, func(i int) string { return entries[i].Name })
+		idx, err := fzf.Find(entries, func(i int) string {
+			return entries[i].GetCombined(viper.GetStringSlice(utils.ConfigKeypathEntryIdentifier))
+		})
 		cobra.CheckErr(err)
 		selectedEntry = entries[idx]
 	}
 
-	fmt.Printf("%+v\n", selectedEntry)
+	overrideMap := viper.GetStringMapStringSlice(utils.ConfigKeypathClipCopy)
+	copyKeys, ok := overrideMap[selectedEntry.Uuid]
+	if !ok {
+		copyKeys = viper.GetStringSlice(utils.ConfigKeypathClipDefaultCopy)
+	}
+	copyValue := selectedEntry.GetCombined(copyKeys)
+
 	err = clip.Init()
 	cobra.CheckErr(err)
-	clip.Write(clip.FmtText, []byte(selectedEntry.Password.Plaintext()))
+	clip.Write(clip.FmtText, []byte(copyValue))
 	// it seems we need at least some (~5?) milliseconds to be sure the value is copied into clipboard
 	time.Sleep(100 * time.Millisecond)
+
+	fmt.Printf("Copied %s from %s\n",
+		utils.GetCombinedKeys(copyKeys),
+		selectedEntry.GetCombined(viper.GetStringSlice(utils.ConfigKeypathEntryIdentifier)))
 }

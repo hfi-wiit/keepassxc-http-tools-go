@@ -2,6 +2,7 @@ package keepassxc
 
 import (
 	"encoding/json"
+	"fmt"
 	"keepassxc-http-tools-go/pkg/utils"
 	"strings"
 
@@ -78,6 +79,50 @@ func (e Entry) StringFieldsMap() map[string]Password {
 	return e.StringFields.ToMap()
 }
 
+// GetByString returns the value of a property of this Entry by its name as a string.
+func (e Entry) GetByString(key string) string {
+	switch key {
+	case "name":
+		return e.Name
+	case "login":
+		return e.Login
+	case "password":
+		return e.Password.Plaintext()
+	case "totp":
+		return e.Totp
+	case "group":
+		return e.Group
+	case "uuid":
+		return e.Uuid
+	default:
+		key = strings.Replace(key, "stringFields.", "", 1)
+		v, ok := e.StringFields.ToMap()[key]
+		if !ok {
+			return ""
+		}
+		return v.Plaintext()
+	}
+}
+
+// GetCombined returns GetByString, if keys has exactly 1 item.
+// If there are more, the first item is expected to be a format string,
+// the other items are parameters to GetByString.
+// Example parameters: ["%s %s", "uuid", "name"]
+func (e Entry) GetCombined(keys []string) string {
+	switch len(keys) {
+	case 0:
+		return ""
+	case 1:
+		return e.GetByString(keys[0])
+	default:
+		values := make([]any, len(keys)-1)
+		for i, v := range keys[1:] {
+			values[i] = e.GetByString(v)
+		}
+		return fmt.Sprintf(keys[0], values...)
+	}
+}
+
 // Entries represents a list of Entry objects.
 type Entries []*Entry
 
@@ -91,11 +136,11 @@ func (e Entries) Names() []string {
 }
 
 // TODO required?
-func (e Entries) FilterByName(name string) Entries {
+func (e Entries) FilterByName(name ...string) Entries {
 	newEntries := make(Entries, len(e))
 	count := 0
 	for _, entry := range e {
-		if strings.Contains(entry.Name, name) {
+		if utils.ContainsAll(entry.Name, name...) {
 			newEntries[count] = entry
 			count += 1
 		}

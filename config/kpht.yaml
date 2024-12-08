@@ -1,6 +1,33 @@
-# this association profile is generated and saved automatically in first run
+## This config is supposed to be in the user's config directory (e.g. ~/.config/kpht.yaml).
+
+# This association profile is generated and saved automatically in first run.
 assoc:
   name: keepassxc-http-tools-go
   key: null
+# This is an entry fields formatter.
+# It is used to print entries in fuzzy finder and stdout messages.
+# An entry fields formatter may be a single string that represents a field of the entry.
+# Those may be: name, login, password, totp, group, uuid, stringFields.fieldName (where fieldName is the key of the field)
+# The entry fields formatter may as well be a list, then the first item needs to be a format string and the others
+# field names, that fill the format.
+# The setting shown here is the built-in default.
+entryIdentifier:
+  - "%s (%s)"
+  - name
+  - login
+# These are the settings specific for the "clip" subcommand:
 clip:
-  foo: bar
+  # This value is an entry fields formatter as already described before.
+  # It is used to select the field that should be copied if not otherwise specified for an entry.
+  # The setting shown here is the built-in default.
+  defaultCopy: password
+  # Optional entry fields formatter overrides for specific entries.
+  # This is empty by default.
+  copy:
+    # This value is an entry fields formatter as already described before.
+    # The identifier key is the entry's UUID.
+    # This example can be used, if you need to append a totp at the end of a password.
+    dd44313caf7f49ccb02cffafaef590da:
+      - "%s%s"
+      - password
+      - totp
