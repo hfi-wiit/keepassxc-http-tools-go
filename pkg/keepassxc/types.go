@@ -126,16 +126,7 @@ func (e Entry) GetCombined(keys []string) string {
 // Entries represents a list of Entry objects.
 type Entries []*Entry
 
-// TODO required?
-func (e Entries) Names() []string {
-	names := make([]string, len(e))
-	for i, v := range e {
-		names[i] = v.Name
-	}
-	return names
-}
-
-// TODO required?
+// FilterByName filters the Entries collection by the given name substrings.
 func (e Entries) FilterByName(name ...string) Entries {
 	newEntries := make(Entries, len(e))
 	count := 0
@@ -143,6 +134,21 @@ func (e Entries) FilterByName(name ...string) Entries {
 		if utils.ContainsAll(entry.Name, name...) {
 			newEntries[count] = entry
 			count += 1
+		}
+	}
+	return newEntries[:count]
+}
+
+// FilterByGroup filters the Entries collection by the given group names.
+func (e Entries) FilterByGroup(group ...string) Entries {
+	newEntries := make(Entries, len(e))
+	count := 0
+	for _, entry := range e {
+		for _, g := range group {
+			if entry.Group == g {
+				newEntries[count] = entry
+				count += 1
+			}
 		}
 	}
 	return newEntries[:count]

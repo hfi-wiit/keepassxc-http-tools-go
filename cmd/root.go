@@ -52,6 +52,7 @@ func init() {
 func initConfig() {
 	viper.SetDefault(utils.ConfigKeypathEntryIdentifier, []string{"%s (%s)", "name", "login"})
 	viper.SetDefault(utils.ConfigKeypathClipDefaultCopy, []string{"password"})
+	viper.SetDefault(utils.ConfigKeypathScriptIndicatorUrl, "script://keepassxc.go")
 	viper.SetConfigFile(utils.ExpandUserHome(globalFlags.ConfigFile))
 	// read in environment variables that match, but only with KGHT_ prefix
 	viper.SetEnvPrefix(utils.ConfigEnvPrefix)

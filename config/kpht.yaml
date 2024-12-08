@@ -15,8 +15,16 @@ entryIdentifier:
   - "%s (%s)"
   - name
   - login
+# The URL to search for for keepassxc entries for this tool.
+# The setting shown here is the built-in default.
+scriptIndicatorUrl: "script://keepassxc.go"
 # These are the settings specific for the "clip" subcommand:
 clip:
+  # This is a list of group (folder) names to include entries from.
+  # The list is empty by default, which means "don't filter by group".
+  filterByGroups:
+    - clip
+    - scriptsCommon
   # This value is an entry fields formatter as already described before.
   # It is used to select the field that should be copied if not otherwise specified for an entry.
   # The setting shown here is the built-in default.

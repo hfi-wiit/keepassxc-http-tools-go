@@ -55,10 +55,16 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	client, err := keepassxc.NewClient(utils.ViperKeepassxcProfile{})
 	cobra.CheckErr(err)
 	defer client.Disconnect()
-	entries, err := client.GetLogins(utils.ScriptIndicatorUrl)
+	scriptIndicatorUrl := viper.GetString(utils.ConfigKeypathScriptIndicatorUrl)
+	entries, err := client.GetLogins(scriptIndicatorUrl)
 	cobra.CheckErr(err)
 
-	filter := utils.ScriptIndicatorUrl
+	groups := viper.GetStringSlice(utils.ConfigKeypathClipFilterGroups)
+	if len(groups) > 0 {
+		entries = entries.FilterByGroup(groups...)
+	}
+
+	filter := scriptIndicatorUrl
 	if len(args) > 0 {
 		filter = strings.Join(args, " ")
 		entries = entries.FilterByName(args...)

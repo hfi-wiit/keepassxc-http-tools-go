@@ -19,6 +19,10 @@ const (
 	ConfigKeypathClipDefaultCopy = "clip.defaultCopy"
 	// Config key path for the formatter settings override to select the field to copy for specific entries.
 	ConfigKeypathClipCopy = "clip.copy"
+	// Config key path for the filter by groups setting of the clip command.
+	ConfigKeypathClipFilterGroups = "clip.filterByGroups"
+	// Config key path for the URL string for entries to be found by this tool.
+	ConfigKeypathScriptIndicatorUrl = "scriptIndicatorUrl"
 	// StringFields need this Prefix (incl. at least one space) to be returned by keepassxc http api.
 	StringFieldKeyPrefix = "KPH: "
 	// File name of the socket file of keepassxc http api.
@@ -39,6 +43,4 @@ const (
 	LinuxEnvTmpDirDefault = "/tmp"
 	// Linux snaps subdir in user home.
 	LinuxSnapCommonSubdir = "snap/keepassxc/common/"
-	// URL string for entries to be found by this tool.
-	ScriptIndicatorUrl = "script://keepassxc.go"
 )
