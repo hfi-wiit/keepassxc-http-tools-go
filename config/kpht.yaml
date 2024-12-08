@@ -22,6 +22,7 @@ scriptIndicatorUrl: "script://keepassxc.go"
 clip:
   # This is a list of group (folder) names to include entries from.
   # The list is empty by default, which means "don't filter by group".
+  # The group names returned from api only contain the last folder (e.g. /scipts/clip would only contain "clip").
   filterByGroups:
     - clip
     - scriptsCommon

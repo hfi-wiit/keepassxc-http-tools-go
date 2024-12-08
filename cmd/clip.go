@@ -29,13 +29,37 @@ var clipFlags = ClipFlags{}
 
 // clipCmd represents the clip command
 var clipCmd = &cobra.Command{
-	Use:   "clip [namefilter...]",
+	Use:   "clip [namefilters...]",
 	Args:  cobra.ArbitraryArgs,
 	Run:   clipCmdRun,
 	Short: "Copy data from an entry to clipboard",
-	Long: `Copy data from an entry to clipboard.
+	Long: fmt.Sprintf(`Copy data from an entry to clipboard.
 
-TODO more details...`,
+The entries from keepassxc which match the URL "%s"
+(or the one from config key "%s") are scanned by this command.
+The entries are optionally filtered by the group names given at config key "%s".
+Finally if any "namefilters" arguments are given, the entries will be reduced to only those,
+which contain all the namefilters as substring in their entry names.
+If at this point multiple entries still match all the criteria,
+a single entry can be chosen by fuzzy finder logic.
+
+The information of the resuting entry to copy to clipboard is determined by different factors:
+If any of the flag options are given, the corresponding field is copied.
+Otherwise copy information defined by the entry fields formatter "%s" from config.
+This entry fields formatter defaults to "%s".
+Finally this entry fields formatter can be overridden at the config key "%s".
+The entries are identified by their UUID there.
+`,
+		utils.ConfigDefaultScriptIndicatorUrl,
+		utils.ConfigKeypathScriptIndicatorUrl,
+		utils.ConfigKeypathClipFilterGroups,
+		utils.ConfigKeypathClipDefaultCopy,
+		utils.ConfigDefaultClipDefaultCopy,
+		utils.ConfigKeypathClipCopy,
+	),
+	Example: fmt.Sprintf("  %s clip ", utils.ApplicationNameShort) + strings.Join(
+		[]string{"", "-t", "vpn work", "myentry -l"},
+		fmt.Sprintf("\n  %s clip ", utils.ApplicationNameShort)),
 }
 
 func init() {

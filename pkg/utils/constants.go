@@ -17,12 +17,16 @@ const (
 	ConfigKeypathEntryIdentifier = "entryIdentifier"
 	// Config key path for the formatter settings to select the field to copy.
 	ConfigKeypathClipDefaultCopy = "clip.defaultCopy"
+	// Default field to copy.
+	ConfigDefaultClipDefaultCopy = "password"
 	// Config key path for the formatter settings override to select the field to copy for specific entries.
 	ConfigKeypathClipCopy = "clip.copy"
 	// Config key path for the filter by groups setting of the clip command.
 	ConfigKeypathClipFilterGroups = "clip.filterByGroups"
 	// Config key path for the URL string for entries to be found by this tool.
 	ConfigKeypathScriptIndicatorUrl = "scriptIndicatorUrl"
+	// The default URL for ConfigKeypathScriptIndicatorUrl.
+	ConfigDefaultScriptIndicatorUrl = "script://keepassxc.go"
 	// StringFields need this Prefix (incl. at least one space) to be returned by keepassxc http api.
 	StringFieldKeyPrefix = "KPH: "
 	// File name of the socket file of keepassxc http api.
