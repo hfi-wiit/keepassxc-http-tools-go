@@ -16,9 +16,20 @@ import (
 	clip "golang.design/x/clipboard"
 )
 
+// clip flags storage
+type ClipFlags struct {
+	CopyLogin    bool
+	CopyPassword bool
+	CopyTotp     bool
+	CopyUuid     bool
+}
+
+// clip flags storage
+var clipFlags = ClipFlags{}
+
 // clipCmd represents the clip command
 var clipCmd = &cobra.Command{
-	Use:   "clip [namefilter]",
+	Use:   "clip [namefilter...]",
 	Args:  cobra.ArbitraryArgs,
 	Run:   clipCmdRun,
 	Short: "Copy data from an entry to clipboard.",
@@ -29,15 +40,15 @@ TODO more details...`,
 
 func init() {
 	rootCmd.AddCommand(clipCmd)
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// clipCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// clipCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	clipCmd.Flags().BoolVarP(&clipFlags.CopyLogin, "login", "l", false,
+		"Copy login instead of the field specified in config.")
+	clipCmd.Flags().BoolVarP(&clipFlags.CopyPassword, "password", "p", false,
+		"Copy password instead of the field specified in config.")
+	clipCmd.Flags().BoolVarP(&clipFlags.CopyTotp, "totp", "t", false,
+		"Copy totp instead of the field specified in config.")
+	clipCmd.Flags().BoolVarP(&clipFlags.CopyUuid, "uuid", "u", false,
+		"Copy uuid instead of the field specified in config.")
+	clipCmd.MarkFlagsMutuallyExclusive("login", "password", "totp", "uuid")
 }
 
 func clipCmdRun(cmd *cobra.Command, args []string) {
@@ -66,10 +77,22 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 		selectedEntry = entries[idx]
 	}
 
-	overrideMap := viper.GetStringMapStringSlice(utils.ConfigKeypathClipCopy)
-	copyKeys, ok := overrideMap[selectedEntry.Uuid]
-	if !ok {
-		copyKeys = viper.GetStringSlice(utils.ConfigKeypathClipDefaultCopy)
+	var copyKeys []string
+	if clipFlags.CopyTotp {
+		copyKeys = []string{"totp"}
+	} else if clipFlags.CopyPassword {
+		copyKeys = []string{"password"}
+	} else if clipFlags.CopyLogin {
+		copyKeys = []string{"login"}
+	} else if clipFlags.CopyUuid {
+		copyKeys = []string{"uuid"}
+	} else {
+		var ok bool
+		overrideMap := viper.GetStringMapStringSlice(utils.ConfigKeypathClipCopy)
+		copyKeys, ok = overrideMap[selectedEntry.Uuid]
+		if !ok {
+			copyKeys = viper.GetStringSlice(utils.ConfigKeypathClipDefaultCopy)
+		}
 	}
 	copyValue := selectedEntry.GetCombined(copyKeys)
 
