@@ -3,6 +3,13 @@ package utils
 const (
 	// Application name for registration with keepassxc http api.
 	ApplicationName = "keepassxc-http-tools-go"
+	// Application name for the binary & config.
+	ApplicationNameShort   = "kpht"
+	ConfigEnvPrefix        = ApplicationNameShort
+	ConfigFileNameDefault  = ApplicationNameShort + ".yaml"
+	ConfigKeypathAssocName = "assoc.name"
+	ConfigKeypathAssocKey  = "assoc.key"
+
 	// StringFields need this Prefix (incl. at least one space) to be returned by keepassxc http api.
 	StringFieldKeyPrefix = "KPH: "
 	// File name of the socket file of keepassxc http api.

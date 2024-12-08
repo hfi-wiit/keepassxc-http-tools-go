@@ -27,7 +27,7 @@ func NaclKeyToB64(key nacl.Key) string {
 func B64ToNaclKey(b64Key string) nacl.Key {
 	decoded, err := base64.StdEncoding.DecodeString(b64Key)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	key := new([nacl.KeySize]byte)
 	copy(key[:], decoded)

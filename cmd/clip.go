@@ -9,7 +9,6 @@ import (
 	"keepassxc-http-tools-go/pkg/utils"
 	"time"
 
-	"github.com/kevinburke/nacl"
 	fzf "github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
 	clip "golang.design/x/clipboard"
@@ -41,24 +40,8 @@ func init() {
 	// clipCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// TODO add profile from config file
-type dummyProfile struct{}
-
-func (p dummyProfile) GetAssocName() string {
-	return "kpgo-test"
-}
-
-func (p dummyProfile) GetAssocKey() nacl.Key {
-	return utils.B64ToNaclKey("f3UnZZ3fYbTHhGCUzFyOXtnQaS7fIditDbD29M1Ajh4=")
-}
-
-func (p dummyProfile) SetAssoc(x string, y nacl.Key) error {
-	return nil
-}
-
 func clipCmdRun(cmd *cobra.Command, args []string) {
-	// TODO add profile from config file
-	client, err := keepassxc.NewClient(dummyProfile{})
+	client, err := keepassxc.NewClient(ViperKeepassxcProfile{})
 	cobra.CheckErr(err)
 	defer client.Disconnect()
 	entries, err := client.GetLogins(utils.ScriptIndicatorUrl)

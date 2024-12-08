@@ -1,32 +1,37 @@
 /*
 Copyright © 2024 Heiko Finzel heiko.finzel@wiit.cloud
-
 */
 package cmd
 
 import (
-	"fmt"
+	"keepassxc-http-tools-go/pkg/utils"
 	"os"
+	"path"
 
+	"github.com/kevinburke/nacl"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+// this version string is set at compile time in the Makefile
+var Version = "dev"
+
+// global flags storage
+type GlobalFlags struct {
+	// path to the config file
+	ConfigFile string
+}
+
+// global flags storage
+var globalFlags = GlobalFlags{}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "keepassxc-http-tools-go",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Use:     utils.ApplicationNameShort,
+	Version: Version,
+	Args:    cobra.NoArgs,
+	Short:   "A command line client to interact with keepassxc's http api.",
+	Long:    "A command line client to interact with keepassxc's http api.",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -40,38 +45,37 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.keepassxc-http-tools-go.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVarP(&globalFlags.ConfigFile, "config", "c",
+		path.Join(utils.GetConfigDir(), utils.ConfigFileNameDefault), "the config file")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".keepassxc-http-tools-go" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".keepassxc-http-tools-go")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
+	viper.SetConfigFile(utils.ExpandUserHome(globalFlags.ConfigFile))
+	// read in environment variables that match, but only with KGHT_ prefix
+	viper.SetEnvPrefix(utils.ConfigEnvPrefix)
+	viper.AutomaticEnv()
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	viper.ReadInConfig()
+}
+
+// Implements the KeepassxcClientProfile interface for viper config
+type ViperKeepassxcProfile struct{}
+
+func (p ViperKeepassxcProfile) GetAssocName() string {
+	return viper.GetString(utils.ConfigKeypathAssocName)
+}
+
+func (p ViperKeepassxcProfile) GetAssocKey() nacl.Key {
+	b64String := viper.GetString(utils.ConfigKeypathAssocKey)
+	if b64String == "" {
+		return nil
 	}
+	return utils.B64ToNaclKey(b64String)
+}
+
+func (p ViperKeepassxcProfile) SetAssoc(name string, key nacl.Key) error {
+	viper.Set(utils.ConfigKeypathAssocName, name)
+	viper.Set(utils.ConfigKeypathAssocKey, utils.NaclKeyToB64(key))
+	return viper.WriteConfig()
 }
