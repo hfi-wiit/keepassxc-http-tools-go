@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/kevinburke/nacl"
 	"github.com/spf13/viper"
@@ -16,13 +17,13 @@ func GetCombinedKeys(keys []string) string {
 	case 0:
 		return ""
 	case 1:
-		return keys[0]
+		return `"<` + keys[0] + `>"`
 	default:
 		values := make([]any, len(keys)-1)
 		for i, v := range keys[1:] {
 			values[i] = v
 		}
-		return fmt.Sprintf(keys[0], values...)
+		return `"` + fmt.Sprintf(strings.Replace(keys[0], "%s", "<%s>", -1), values...) + `"`
 	}
 }
 

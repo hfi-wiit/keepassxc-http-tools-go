@@ -52,6 +52,7 @@ func init() {
 }
 
 func clipCmdRun(cmd *cobra.Command, args []string) {
+	// get entries from keepassxc
 	client, err := keepassxc.NewClient(utils.ViperKeepassxcProfile{})
 	cobra.CheckErr(err)
 	defer client.Disconnect()
@@ -59,11 +60,13 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	entries, err := client.GetLogins(scriptIndicatorUrl)
 	cobra.CheckErr(err)
 
+	// filter entries by configured groups
 	groups := viper.GetStringSlice(utils.ConfigKeypathClipFilterGroups)
 	if len(groups) > 0 {
 		entries = entries.FilterByGroup(groups...)
 	}
 
+	// filter entries by optional name filter arguments
 	filter := scriptIndicatorUrl
 	if len(args) > 0 {
 		filter = strings.Join(args, " ")
@@ -76,6 +79,7 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	case 1:
 		selectedEntry = entries[0]
 	default:
+		// and if multiple are left, chose one per fuzzy finder
 		idx, err := fzf.Find(entries, func(i int) string {
 			return entries[i].GetCombined(viper.GetStringSlice(utils.ConfigKeypathEntryIdentifier))
 		})
@@ -83,6 +87,7 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 		selectedEntry = entries[idx]
 	}
 
+	// select the value(s) to copy from the selected entry, either from flag
 	var copyKeys []string
 	if clipFlags.CopyTotp {
 		copyKeys = []string{"totp"}
@@ -93,6 +98,7 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	} else if clipFlags.CopyUuid {
 		copyKeys = []string{"uuid"}
 	} else {
+		// or from config
 		var ok bool
 		overrideMap := viper.GetStringMapStringSlice(utils.ConfigKeypathClipCopy)
 		copyKeys, ok = overrideMap[selectedEntry.Uuid]
@@ -102,6 +108,7 @@ func clipCmdRun(cmd *cobra.Command, args []string) {
 	}
 	copyValue := selectedEntry.GetCombined(copyKeys)
 
+	// copy that value to clipboard
 	err = clip.Init()
 	cobra.CheckErr(err)
 	clip.Write(clip.FmtText, []byte(copyValue))

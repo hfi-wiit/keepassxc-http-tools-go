@@ -127,6 +127,7 @@ func (e Entry) GetCombined(keys []string) string {
 type Entries []*Entry
 
 // FilterByName filters the Entries collection by the given name substrings.
+// The entries have to match all substrings.
 func (e Entries) FilterByName(name ...string) Entries {
 	newEntries := make(Entries, len(e))
 	count := 0
@@ -140,6 +141,7 @@ func (e Entries) FilterByName(name ...string) Entries {
 }
 
 // FilterByGroup filters the Entries collection by the given group names.
+// The entries have to match any group exactly.
 func (e Entries) FilterByGroup(group ...string) Entries {
 	newEntries := make(Entries, len(e))
 	count := 0
